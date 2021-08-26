@@ -1,0 +1,71 @@
+version: "3.8"
+services:
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    ports:
+    - 9090:9090
+    volumes:
+    - ./prometheus_data/:/prometheus/
+    - ./config/:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    restart: always
+    networks:
+      - spring-watching
+
+  metrics-client:
+    container_name: metrics-client
+    build:
+      context: services/metrics
+      dockerfile: Dockerfile
+    ports:
+    - 2001:2001
+    restart: always
+    networks:
+      - spring-watching
+
+  storage-db:
+    container_name: storage-db
+    image: library/postgres:13
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_DB=storage
+      - POSTGRES_PASSWORD=test
+      - PGDATA=/data/pgdata
+    ports:
+      - 15432:5432
+    networks:
+      - spring-watching
+
+  user-service:
+    container_name: user-service
+    build:
+      context: services/storage
+      dockerfile: Dockerfile
+    ports:
+     - 2002:2002
+    restart: always
+    depends_on:
+      - storage-db
+    networks:
+     - spring-watching
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:7.5.10
+    ports:
+    - 3000:3000
+    networks:
+      - spring-watching
+
+networks:
+  spring-watching:
+    driver: bridge
+
+
+
+

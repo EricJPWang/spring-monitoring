@@ -1,0 +1,8 @@
+spring:
+  flyway:
+    enabled: false
+
+  r2dbc:
+    url: r2dbc:h2:mem://./testdb
+    username:
+    password:

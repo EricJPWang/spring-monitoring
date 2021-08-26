@@ -1,0 +1,37 @@
+server:
+  port: 2002
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+    jmx:
+      exposure:
+        include: '*'
+
+
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://test:test@storage-db:5432/storage
+    username: test
+    password: test
+    pool:
+      enabled: true
+      max-size: 5
+      initial-size: 5
+  flyway:
+    url: jdbc:postgresql://storage-db:5432/storage
+    user: ${spring.r2dbc.username}
+    password: ${spring.r2dbc.password}
+    enabled: true
+    schemas: public
+    locations: classpath:db/migration
+
+
+logging:
+  level:
+    org:
+      springframework:
+        r2dbc: DEBUG
+        web: DEBUG

@@ -1,0 +1,35 @@
+metricbeat.modules:
+  - module: system
+    metricsets:
+      - cpu
+      - load
+      - memory
+      - network
+      - process
+      - process_summary
+      - socket_summary
+      #- entropy
+      #- core
+      #- diskio
+      #- socket
+    enabled: true
+    period: 15s
+    processes: [ '.*' ]
+  - module: jolokia
+    metricsets: [ "jmx" ]
+    hosts: ["metrics:2001"]
+    path: "/actuator/jolokia"
+    http_method: "GET"
+    namespace: "jolokia_metrics"
+    enabled: true
+    period: 5s
+    jmx.mappings:
+    - mbean: "java.lang:type=Threading"
+      attributes:
+      - attr: "ThreadCount"
+        field: "thread.count"
+      - attr: "DaemonThreadCount"
+        field: "thread.daemon"
+
+output.elasticsearch:
+    hosts: ["elastic-search:9200"]
